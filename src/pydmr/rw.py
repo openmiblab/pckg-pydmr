@@ -403,7 +403,8 @@ def read(path:str, format='flat', subject=None, study=None, parameter=None):
         if 'rois.csv' in csv_files: 
             rois = {}
             with z.open('rois.csv') as file:
-                text = TextIOWrapper(file, encoding="utf-8")
+                # text = TextIOWrapper(file, encoding="utf-8")
+                text = TextIOWrapper(file, encoding="utf-8-sig", newline="")
                 reader = csv.reader(text)
                 rois_list = list(reader)
                 if len(rois_list)!=0:

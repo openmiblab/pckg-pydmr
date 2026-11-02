@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import pydmr.rw
 import pydmr.pydict
 
@@ -35,6 +36,24 @@ def pars_to_long(dmr_file, long_file):
     """
     dmr = pydmr.read(dmr_file, format='pandas')
     table_long = dmr['pars']
+    parameters = table_long.parameter.values.tolist()
+    extra_columns = metadata(dmr_file, parameters)
+    cols = ['description', 'unit', 'type']
+    if 'columns' in dmr:
+        cols += dmr['columns']
+    for c, col in enumerate(cols):
+        table_long[col] = [extra_columns[p][c] for p in range(len(parameters))]
+    table_long.to_csv(long_file, index=False)
+
+def sdev_to_long(dmr_file, long_file):
+    """Save parameter sdev values in long-format csv shape
+
+    Args:
+        dmr_file (dmr file name): Source file
+        long_file (csv file name): Output file
+    """
+    dmr = pydmr.read(dmr_file, format='pandas')
+    table_long = dmr['sdev']
     parameters = table_long.parameter.values.tolist()
     extra_columns = metadata(dmr_file, parameters)
     cols = ['description', 'unit', 'type']
@@ -155,6 +174,10 @@ def concat(
     Returns:
         str: The result file
     """
+    # If a dir is given
+    if not isinstance(files, list):
+        files = list(Path(files).glob("*.dmr.zip"))
+        files = [str(s) for s in files]
 
     # combine dmr files
     dmr = {'data': {}}
